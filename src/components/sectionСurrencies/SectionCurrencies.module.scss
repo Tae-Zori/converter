@@ -1,0 +1,32 @@
+.currencies {
+    width: 600px;
+    &__wrapper {
+        width: 100%;
+        display: flex;
+        border-radius: 10px;
+        overflow: hidden;
+        button {
+            border: none;
+            border-right: 1px solid gray;
+            width: 120px;
+            height: 50px;
+        }
+        & button:last-child {
+            border-right: none;
+        }
+        img {
+            width: 30px;
+            height: 30px;
+        }
+    }
+    &__button {
+        &.active {
+            background-color: #4caf50;
+            color: white;
+        }
+        &.inactive {
+            background-color: #f0f0f0;
+            color: black;
+        }
+    }
+}

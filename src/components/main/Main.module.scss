@@ -1,0 +1,15 @@
+.main {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: #8e9b97;
+    &__wrapper {
+        padding-top: 50px;
+        display: flex;
+        justify-content: center;
+        max-width: 1240px;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.067);
+    }
+}
