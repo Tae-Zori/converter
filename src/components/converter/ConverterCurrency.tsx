@@ -1,46 +1,56 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import MyInput from "../UI/input/MyInput";
 import SectionCurrencies from "../sectionСurrencies/SectionCurrencies";
 import cl from "./Converter.module.scss";
 import { observer } from "mobx-react-lite";
 import Modal from "../UI/modal/Modal";
 import useCurrencies from "../../hooks/Currencies";
-import ConverterStore from "../../store/ConverterStore";
 import useConverter from "../../hooks/Converter";
+import ConverterStore from "../../store/ConverterStore";
 
-const Converter = observer(({ id }: any) => {
-    const [visibleModal, setVisibleModal] = useState<boolean>(false);
-    // const { valuteArray, defaultValute } = useCurrencies();
-    // const store = React.useMemo(() => new ConverterStore(id), [id]);
+const Converter = observer(({ id }: { id: string }) => {
+    const storeRef = useRef<ConverterStore | null>(null);
+
+    if (!storeRef.current) {
+        storeRef.current = new ConverterStore(id);
+    }
+    const converterStore = storeRef.current;
+
+    const { valuteArray, defaultValute } = useCurrencies();
     const {
         fromCurrency,
-        setFromCurrency,
+        upDateFromCurrency,
         toCurrency,
-        setToCurrency,
+        upDateToCurrency,
         fromAmount,
         setFromAmount,
         toAmount,
         setToAmount,
         rateFromTo,
         rateToFrom,
-        valuteArray,
-        defaultValute,
+        fromSelectedCur,
+        toSelectedCur,
+        upDateSelected,
     } = useConverter();
 
     return (
         <article className={cl.converter}>
             <section className={cl.converter__item}>
                 <SectionCurrencies
-                    visibleModal={visibleModal}
+                    visibleModal={converterStore.visibleModal}
                     defaultValute={defaultValute}
-                    selectedCurrencyFromModal={fromCurrency}
+                    selectedCurrencyFromModal={fromSelectedCur}
                     selectedCurrency={fromCurrency}
-                    setSelectedCurrency={setFromCurrency}
+                    setSelectedCurrency={upDateFromCurrency}
+                    watcher={converterStore.watcher}
+                    showMore={converterStore.handlerClickFor}
+                    type="from"
                 />
                 <MyInput
                     value={fromAmount}
                     onChange={(e) => setFromAmount(Number(e.target.value))}
                 />
+                <p>{rateFromTo}</p>
             </section>
             <button>
                 <img
@@ -50,18 +60,28 @@ const Converter = observer(({ id }: any) => {
             </button>
             <section className={cl.converter__item}>
                 <SectionCurrencies
-                    visibleModal={visibleModal}
+                    visibleModal={converterStore.visibleModal}
                     defaultValute={defaultValute}
-                    selectedCurrencyFromModal={toCurrency}
+                    selectedCurrencyFromModal={toSelectedCur}
                     selectedCurrency={toCurrency}
-                    setSelectedCurrency={setToCurrency}
+                    setSelectedCurrency={upDateToCurrency}
+                    watcher={converterStore.watcher}
+                    showMore={converterStore.handlerClickTo}
+                    type="to"
                 />
                 <MyInput
                     value={toAmount}
                     onChange={(e) => setToAmount(Number(e.target.value))}
                 />
+                <p>{rateToFrom}</p>
             </section>
-            {visibleModal && <Modal currencies={valuteArray} />}
+            {converterStore.visibleModal && (
+                <Modal
+                    currencies={valuteArray}
+                    handlerClick={upDateSelected}
+                    watcher={converterStore.watcher}
+                />
+            )}
         </article>
     );
 });

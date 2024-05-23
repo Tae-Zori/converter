@@ -1,8 +1,12 @@
 .modal {
     position: absolute;
+    top: 50px;
     width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
     &__wrapper {
         background: wheat;
+
         ul {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;

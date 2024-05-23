@@ -1,16 +1,20 @@
 import { useState, useEffect } from "react";
 import { InfoCurrency } from "../interfaces/interfaces";
 import { defaultRub } from "../data/DefaultCurrency";
-import DataStore from "../store/DataStore";
-import { toJS } from "mobx";
 
 const useConverter = () => {
     const [fromCurrency, setFromCurrency] = useState<InfoCurrency>(defaultRub);
     const [toCurrency, setToCurrency] = useState<InfoCurrency>(defaultRub);
-    const [fromAmount, setFromAmount] = useState<number>(1);
-    const [toAmount, setToAmount] = useState<number>(1);
+    const [fromAmount, setFromAmount] = useState<number>(0);
+    const [toAmount, setToAmount] = useState<number>(0);
     const [rateFromTo, setRateFromTo] = useState<string>("");
     const [rateToFrom, setRateToFrom] = useState<string>("");
+    const [fromSelectedCur, setFromSelectedCur] = useState<InfoCurrency | null>(
+        null
+    );
+    const [toSelectedCur, setToSelectedCur] = useState<InfoCurrency | null>(
+        null
+    );
 
     const saveToLocalStorage = (key: string, value: any) => {
         try {
@@ -20,13 +24,47 @@ const useConverter = () => {
         }
     };
 
-    const loadFromLocalStorage = () => {
+    const upDateSelected = (valute: InfoCurrency, watcher: string) => {
         try {
-            const fromCurrency = localStorage.getItem("fromCurrency");
-            const toCurrency = localStorage.getItem("toCurrency");
+            if (watcher === "from") {
+                saveToLocalStorage("fromCurrency", valute);
+                const fromValute = localStorage.getItem("fromCurrency");
+                if (fromValute) setFromCurrency(JSON.parse(fromValute));
+                saveToLocalStorage("fromSelectedCurrency", valute);
+                const selectedFromValute = localStorage.getItem(
+                    "fromSelectedCurrency"
+                );
+                if (selectedFromValute)
+                    setFromSelectedCur(JSON.parse(selectedFromValute));
+            } else if (watcher === "to") {
+                saveToLocalStorage("toCurrency", valute);
+                const toValute = localStorage.getItem("toCurrency");
+                if (toValute) setToCurrency(JSON.parse(toValute));
+                saveToLocalStorage("toSelectedCurrency", valute);
+                const selectedToValute =
+                    localStorage.getItem("toSelectedCurrency");
+                if (selectedToValute)
+                    setToSelectedCur(JSON.parse(selectedToValute));
+            }
+        } catch (error) {
+            console.error("Failed to load data from LocalStorage:", error);
+        }
+    };
 
-            if (fromCurrency) setFromCurrency(JSON.parse(fromCurrency));
-            if (toCurrency) setToCurrency(JSON.parse(toCurrency));
+    const upDateFromCurrency = (valute: InfoCurrency) => {
+        try {
+            saveToLocalStorage("fromCurrency", valute);
+            const fromValute = localStorage.getItem("fromCurrency");
+            if (fromValute) setFromCurrency(JSON.parse(fromValute));
+        } catch (error) {
+            console.error("Failed to load data from LocalStorage:", error);
+        }
+    };
+    const upDateToCurrency = (valute: InfoCurrency) => {
+        try {
+            saveToLocalStorage("toCurrency", valute);
+            const toValute = localStorage.getItem("toCurrency");
+            if (toValute) setToCurrency(JSON.parse(toValute));
         } catch (error) {
             console.error("Failed to load data from LocalStorage:", error);
         }
@@ -34,77 +72,59 @@ const useConverter = () => {
 
     const calculateRates = () => {
         if (fromCurrency && toCurrency) {
-            const rateFromToValue =
+            const rateFromToValue = (
                 fromCurrency.Value /
                 fromCurrency.Nominal /
-                (toCurrency.Value / toCurrency.Nominal);
-            const rateToFromValue =
+                (toCurrency.Value / toCurrency.Nominal)
+            ).toFixed(2);
+            const rateToFromValue = (
                 toCurrency.Value /
                 toCurrency.Nominal /
-                (fromCurrency.Value / fromCurrency.Nominal);
+                (fromCurrency.Value / fromCurrency.Nominal)
+            ).toFixed(2);
 
             setRateFromTo(
-                `1 ${fromCurrency.CharCode} = ${rateFromToValue.toFixed(4)} ${
-                    toCurrency.CharCode
-                }`
+                `1 ${fromCurrency.CharCode} = ${rateFromToValue} ${toCurrency.CharCode}`
             );
             setRateToFrom(
-                `1 ${toCurrency.CharCode} = ${rateToFromValue.toFixed(4)} ${
-                    fromCurrency.CharCode
-                }`
+                `1 ${toCurrency.CharCode} = ${rateToFromValue} ${fromCurrency.CharCode}`
             );
 
-            const newToAmount = fromAmount * rateFromToValue;
+            const newToAmount = fromAmount * Number(rateFromToValue);
             setToAmount(newToAmount);
         }
     };
 
     useEffect(() => {
-        loadFromLocalStorage();
+        const fromCurrency = localStorage.getItem("fromCurrency");
+        const toCurrency = localStorage.getItem("toCurrency");
+        if (fromCurrency) setFromCurrency(JSON.parse(fromCurrency));
+        if (toCurrency) setToCurrency(JSON.parse(toCurrency));
+        const selectedFromValute = localStorage.getItem("fromSelectedCurrency");
+        if (selectedFromValute)
+            setFromSelectedCur(JSON.parse(selectedFromValute));
+        const selectedToValute = localStorage.getItem("toSelectedCurrency");
+        if (selectedToValute) setToSelectedCur(JSON.parse(selectedToValute));
     }, []);
 
     useEffect(() => {
         calculateRates();
-        saveToLocalStorage("fromCurrency", fromCurrency);
-        saveToLocalStorage("toCurrency", toCurrency);
-        saveToLocalStorage("fromAmount", fromAmount);
-        saveToLocalStorage("toAmount", toAmount);
     }, [fromCurrency, toCurrency, fromAmount, toAmount]);
-
-    const { getData, data } = DataStore;
-    useEffect(() => {
-        getData();
-    }, []);
-
-    const valuteArray = data
-        ? Object.values(toJS(data)).filter(
-              (item) => item.CharCode !== "USD" && item.CharCode !== "EUR"
-          )
-        : [];
-
-    const defaultValute = [
-        defaultRub,
-        ...Object.values(toJS(data)).filter(
-            (item) =>
-                item.CharCode === "RUB" ||
-                item.CharCode === "USD" ||
-                item.CharCode === "EUR"
-        ),
-    ];
 
     return {
         fromCurrency,
-        setFromCurrency,
+        upDateFromCurrency,
         toCurrency,
-        setToCurrency,
+        upDateToCurrency,
         fromAmount,
         setFromAmount,
         toAmount,
         setToAmount,
         rateFromTo,
         rateToFrom,
-        valuteArray,
-        defaultValute,
+        fromSelectedCur,
+        toSelectedCur,
+        upDateSelected,
     };
 };
 
