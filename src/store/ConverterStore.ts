@@ -1,87 +1,77 @@
 import { makeAutoObservable } from "mobx";
 import { InfoCurrency } from "../interfaces/interfaces";
-import { defaultRub } from "../data/DefaultCurrency";
-
-// class ConverterStore {
-//     selectedFromCurrency: InfoCurrency | null = null;
-//     selectedToCurrency: InfoCurrency | null = null;
-//     visibleModal: boolean = false;
-//     watcher: string = "";
-//     id: string;
-
-//     constructor(id: string) {
-//         makeAutoObservable(this);
-//         this.id = id;
-//     }
-
-//     saveToLocalStorage = (key: string, value: any) => {
-//         try {
-//             localStorage.setItem(key, JSON.stringify(value));
-//         } catch (error) {
-//             console.error("Failed to save data to LocalStorage:", error);
-//         }
-//     };
-//     handlerClickFor = () => {
-//         if (this.watcher !== "from" && !this.visibleModal) {
-//             this.watcher = "from";
-//             this.visibleModal = true;
-//         }
-//         if (this.watcher == "from" && this.visibleModal) {
-//             this.visibleModal = false;
-//             this.watcher = "";
-//         }
-//     };
-//     handlerClickTo = () => {
-//         if (this.watcher !== "to" && !this.visibleModal) {
-//             this.watcher = "to";
-//             this.visibleModal = true;
-//         }
-//         if (this.watcher == "to" && this.visibleModal) {
-//             this.visibleModal = false;
-//             this.watcher = "";
-//         }
-//     };
-// }
-
-// export default ConverterStore;
-
-// upDateFromCurrency = (valute: InfoCurrency) => {
-//     try {
-//         this.saveToLocalStorage("fromCurrency", valute);
-//         const fromValute = localStorage.getItem("fromCurrency");
-//         if (fromValute) setFromCurrency(JSON.parse(fromValute));
-//     } catch (error) {
-//         console.error("Failed to load data from LocalStorage:", error);
-//     }
-// };
 
 class ConverterStore {
-    visibleModal: boolean = false;
-    watcher: string = "";
-    id: string;
+    fromCurrency: InfoCurrency;
+    toCurrency: InfoCurrency;
+    fromAmount: number = 0;
+    toAmount: number = 0;
+    rateFrom: string = "";
+    rateTo: string = "";
+    rateToFromValue: number = 0;
+    rateFromToValue: number = 0;
 
-    constructor(id: string) {
+    constructor(fromCurrency: InfoCurrency, toCurrency: InfoCurrency) {
         makeAutoObservable(this);
-        this.id = id;
+        this.fromCurrency = fromCurrency;
+        this.toCurrency = toCurrency;
     }
 
-    handlerClickFor = () => {
-        if (this.watcher === "from") {
-            this.visibleModal = !this.visibleModal;
-        } else {
-            this.watcher = "from";
-            this.visibleModal = true;
-        }
-    };
+    setFromCurrency(currency: InfoCurrency) {
+        this.fromCurrency = currency;
+        this.calculateRates();
+    }
 
-    handlerClickTo = () => {
-        if (this.watcher === "to") {
-            this.visibleModal = !this.visibleModal;
-        } else {
-            this.watcher = "to";
-            this.visibleModal = true;
+    setToCurrency(currency: InfoCurrency) {
+        this.toCurrency = currency;
+        this.calculateRates();
+    }
+
+    setFromAmount(amount: number) {
+        this.fromAmount = amount;
+        this.calculateToAmount();
+    }
+
+    setToAmount(amount: number) {
+        this.toAmount = amount;
+        this.calculateFromAmount();
+    }
+
+    calculateRates() {
+        if (this.fromCurrency && this.toCurrency) {
+            this.rateFromToValue =
+                this.fromCurrency.Value /
+                this.fromCurrency.Nominal /
+                (this.toCurrency.Value / this.toCurrency.Nominal);
+
+            this.rateToFromValue =
+                this.toCurrency.Value /
+                this.toCurrency.Nominal /
+                (this.fromCurrency.Value / this.fromCurrency.Nominal);
+
+            this.rateFrom = `1 ${
+                this.fromCurrency.CharCode
+            } = ${this.rateFromToValue.toFixed(2)} ${this.toCurrency.CharCode}`;
+            this.rateTo = `1 ${
+                this.toCurrency.CharCode
+            } = ${this.rateToFromValue.toFixed(2)} ${
+                this.fromCurrency.CharCode
+            }`;
+
+            this.calculateToAmount();
         }
-    };
+    }
+
+    calculateToAmount() {
+        this.toAmount = Number(
+            (this.fromAmount * this.rateFromToValue).toFixed(2)
+        );
+    }
+    calculateFromAmount() {
+        this.fromAmount = Number(
+            (this.toAmount * this.rateToFromValue).toFixed(2)
+        );
+    }
 }
 
 export default ConverterStore;

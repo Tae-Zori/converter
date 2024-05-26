@@ -1,21 +1,69 @@
+@import "./../../../style/variables";
 .modal {
     position: absolute;
     top: 50px;
     width: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
+    margin-top: 1px;
+
     &__wrapper {
-        background: wheat;
+        background: $color1;
+        padding: 5px;
+        border-radius: 10px;
 
         ul {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
+            height: 150px;
             width: 100%;
+            overflow-y: scroll;
+            overflow-x: hidden;
         }
         li {
-            display: grid;
-            grid-template-columns: 1fr 30px;
+            font-size: 17px;
+            border-bottom: 1px solid rgba(9, 9, 9, 0.17);
+            text-align: center;
+            padding: 5px 0px;
+            cursor: pointer;
+            transition: all 0.2s linear;
+            span {
+                font-style: italic;
+                font-weight: 500;
+            }
+
+            &:active {
+                color: $color1;
+                background: $color3;
+            }
+        }
+    }
+}
+
+@media (max-width: 850px) {
+    .modal {
+        ul {
+            grid-template-columns: 1fr 1fr;
+            height: 189px;
+        }
+    }
+}
+@media (max-width: 400px) {
+    .modal {
+        ul {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+@media (hover: hover) {
+    .modal {
+        li {
+            &:hover {
+                color: $color1;
+                background: $color3;
+            }
+            &:active {
+                color: $color1;
+                background: $color4;
+            }
         }
     }
 }

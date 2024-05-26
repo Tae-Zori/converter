@@ -44,22 +44,31 @@ const SectionCurrencies = observer(
                             {item.CharCode}
                         </button>
                     ))}
-                    {selectedCurrencyFromModal && (
-                        <button
-                            className={`${cl.currencies__button} ${
-                                selectedCurrency.CharCode ===
-                                selectedCurrencyFromModal.CharCode
-                                    ? cl.active
-                                    : cl.inactive
-                            }`}
-                            onClick={(e) =>
-                                setSelectedCurrency(selectedCurrencyFromModal)
-                            }
-                        >
-                            {selectedCurrencyFromModal?.CharCode}
-                        </button>
-                    )}
-                    <button onClick={showMore}>
+
+                    <button
+                        className={`${cl.currencies__button} ${
+                            selectedCurrency.CharCode ===
+                            selectedCurrencyFromModal?.CharCode
+                                ? cl.active
+                                : cl.inactive
+                        }`}
+                        onClick={(e) => {
+                            selectedCurrencyFromModal
+                                ? setSelectedCurrency(selectedCurrencyFromModal)
+                                : alert("Пожалуйста, выберите валюту");
+                        }}
+                    >
+                        {selectedCurrencyFromModal
+                            ? selectedCurrencyFromModal?.CharCode
+                            : "-"}
+                    </button>
+
+                    <button
+                        onClick={showMore}
+                        className={`${cl.currencies__showMore} ${
+                            isVisible ? cl.active : cl.inactive
+                        }`}
+                    >
                         {isVisible ? (
                             <img
                                 src={

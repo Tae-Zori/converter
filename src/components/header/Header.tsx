@@ -6,7 +6,7 @@ const Header = () => {
     return (
         <header className={cl.header}>
             <div className={cl.header__wrapper}>
-                <img src={logo} alt="logo" />
+                <img className={cl.header__logo} src={logo} alt="logo" />
 
                 <h1>Конвертер валют</h1>
             </div>

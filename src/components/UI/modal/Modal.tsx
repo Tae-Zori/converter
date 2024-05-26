@@ -18,8 +18,10 @@ const Modal = ({ currencies, handlerClick, watcher }: IPropsModal) => {
                             key={item.ID}
                             onClick={() => handlerClick(item, watcher)}
                         >
-                            {item.Name}
-                            <span> {item.CharCode}</span>
+                            <p>
+                                {" "}
+                                {item.Name} (<span>{item.CharCode}</span>)
+                            </p>
                         </li>
                     ))}
                 </ul>
